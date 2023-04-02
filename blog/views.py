@@ -44,9 +44,9 @@ def index(request):
                              .annotate(count_likes=Count('likes', distinct=True),
                                        comments_amount=Count('comments', distinct=True))\
                              .order_by('-count_likes')[:5]
-    print(most_popular_posts[0].comments_amount)
-    fresh_posts = Post.objects.prefetch_related('author').order_by('published_at')
-    most_fresh_posts = list(fresh_posts)[-5:]
+    most_fresh_posts = Post.objects.prefetch_related('author')\
+                           .annotate(comments_amount=Count('comments', distinct=True))\
+        .order_by('-published_at')[:5]
     most_popular_tags = Tag.objects.annotate(count_tags=Count('posts')).order_by('-count_tags')[:5]
     context = {
         'most_popular_posts': [serialize_post_optimized(post) for post in most_popular_posts],
@@ -82,7 +82,9 @@ def post_detail(request, slug):
         'tags': [serialize_tag(tag) for tag in related_tags],
     }
     most_popular_tags = Tag.objects.annotate(count_tags=Count('posts')).order_by('-count_tags')[:5]
-    most_popular_posts = Post.objects.annotate(count_likes=Count('likes')).order_by('-count_likes')[:5]
+    most_popular_posts = Post.objects.annotate(count_likes=Count('likes', distinct=True),
+                                               comments_amount=Count('comments', distinct=True))\
+                             .order_by('-count_likes')[:5]
     context = {
         'post': serialized_post,
         'popular_tags': [serialize_tag(tag) for tag in most_popular_tags],
@@ -96,8 +98,10 @@ def post_detail(request, slug):
 def tag_filter(request, tag_title):
     tag = Tag.objects.get(title=tag_title)
     most_popular_tags = Tag.objects.annotate(count_tags=Count('posts')).order_by('-count_tags')[:5]
-    most_popular_posts = Post.objects.annotate(count_likes=Count('likes')).order_by('-count_likes')[:5]
-    related_posts = tag.posts.all()[:20]
+    most_popular_posts = Post.objects.annotate(count_likes=Count('likes', distinct=True),
+                                               comments_amount=Count('comments', distinct=True))\
+                             .order_by('-count_likes')[:5]
+    related_posts = tag.posts.annotate(comments_amount=Count('comments', distinct=True))[:20]
     context = {
         'tag': tag.title,
         'popular_tags': [serialize_tag(tag) for tag in most_popular_tags],
