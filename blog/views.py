@@ -26,14 +26,12 @@ def serialize_tag_optimized(tag):
 
 
 def index(request):
-    most_popular_posts = Post.objects.popular()[:5]
-    most_popular_posts_ids = [post.id for post in most_popular_posts]
-    posts_with_comments = Post.objects.filter(id__in=most_popular_posts_ids).annotate(comments_count=Count('comments'))
-    print(posts_with_comments.values_list('comments_count'))
-    ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
-    count_for_id = dict(ids_and_comments)
-    for post in most_popular_posts:
-        post.comments_count = count_for_id[post.id]
+    most_popular_posts = Post.objects.popular()[:5] \
+                             .prefetch_related('author')[:5] \
+                             .fetch_with_comments_count()
+
+    print(most_popular_posts)
+    print(type(most_popular_posts))
 
     most_fresh_posts = Post.objects.annotate(comments_count=Count('comments')).order_by('-published_at')[:5]
     most_fresh_posts_ids = [post.id for post in most_fresh_posts]
