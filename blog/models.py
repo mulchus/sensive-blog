@@ -10,7 +10,7 @@ class PostQuerySet(models.QuerySet):
         return posts_at_year
 
     def popular(self):
-        most_popular_posts = self.annotate(count_likes=Count('likes')).order_by('-count_likes')
+        most_popular_posts = self.prefetch_related('author', 'tags').annotate(likes_count=Count('likes')).order_by('-likes_count')
         return most_popular_posts
 
 
@@ -52,7 +52,7 @@ class Post(models.Model):
 
 class TagQuerySet(models.QuerySet):
     def popular(self):
-        most_popular_tags = self.annotate(count_tags=Count('posts')).order_by('-count_tags')
+        most_popular_tags = self.annotate(posts_count=Count('posts')).order_by('-posts_count')
         return most_popular_tags
 
 
