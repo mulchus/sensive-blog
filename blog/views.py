@@ -21,7 +21,7 @@ def serialize_post_optimized(post):
 def serialize_tag_optimized(tag):
     return {
         'title': tag.title,
-        'posts_with_tag': tag.posts_count,
+        'posts_with_tag': tag.posts__count,
     }
 
 
