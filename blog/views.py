@@ -30,16 +30,9 @@ def index(request):
                              .prefetch_related('author')[:5] \
                              .fetch_with_comments_count()
 
-    print(most_popular_posts)
-    print(type(most_popular_posts))
-
-    most_fresh_posts = Post.objects.annotate(comments_count=Count('comments')).order_by('-published_at')[:5]
-    most_fresh_posts_ids = [post.id for post in most_fresh_posts]
-    posts_with_comments = Post.objects.filter(id__in=most_fresh_posts_ids).annotate(comments_count=Count('comments'))
-    ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
-    count_for_id = dict(ids_and_comments)
-    for post in most_fresh_posts:
-        post.comments_count = count_for_id[post.id]
+    most_fresh_posts = Post.objects.fresh()[:5] \
+                           .prefetch_related('author')[:5] \
+                           .fetch_with_comments_count()
 
     most_popular_tags = Tag.objects.popular()[:5]
 

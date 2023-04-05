@@ -10,15 +10,17 @@ class PostQuerySet(models.QuerySet):
         return posts_at_year
 
     def popular(self):
-        most_popular_posts = self.prefetch_related('tags').annotate(likes_count=Count('likes')).order_by('-likes_count')
-        return most_popular_posts
+        popular_posts = self.prefetch_related('tags').annotate(Count('likes')).order_by('-likes__count')
+        return popular_posts
+
+    def fresh(self):
+        fresh_posts = self.annotate(Count('comments')).order_by('-published_at')
+        return fresh_posts
 
     def fetch_with_comments_count(self):
-        most_popular_posts_ids = [post.id for post in self]
-        posts_with_comments = Post.objects.filter(id__in=most_popular_posts_ids).annotate(
-            comments_count=Count('comments'))
-        print(posts_with_comments.values_list('comments_count'))
-        ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
+        posts_ids = [post.id for post in self]
+        posts_with_comments = Post.objects.filter(id__in=posts_ids).annotate(Count('comments'))
+        ids_and_comments = posts_with_comments.values_list('id', 'comments__count')
         count_for_id = dict(ids_and_comments)
         for post in self:
             post.comments_count = count_for_id[post.id]
