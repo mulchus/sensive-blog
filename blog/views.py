@@ -27,14 +27,15 @@ def serialize_tag_optimized(tag):
 
 def index(request):
     most_popular_posts = Post.objects.popular()[:5] \
-                             .prefetch_related('author')[:5] \
+                             .prefetch_related('author', 'tags') \
                              .fetch_with_comments_count()
 
     most_fresh_posts = Post.objects.fresh()[:5] \
-                           .prefetch_related('author')[:5] \
+                           .prefetch_related('author', 'tags') \
                            .fetch_with_comments_count()
 
-    most_popular_tags = Tag.objects.popular()[:5]
+    most_popular_tags = Tag.objects.popular()[:5] \
+                           .prefetch_related('posts')
 
     context = {
         'most_popular_posts': [serialize_post_optimized(post) for post in most_popular_posts],

@@ -10,7 +10,7 @@ class PostQuerySet(models.QuerySet):
         return posts_at_year
 
     def popular(self):
-        popular_posts = self.prefetch_related('tags').annotate(Count('likes')).order_by('-likes__count')
+        popular_posts = self.annotate(Count('likes')).order_by('-likes__count')
         return popular_posts
 
     def fresh(self):
