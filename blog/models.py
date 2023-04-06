@@ -23,7 +23,7 @@ class PostQuerySet(models.QuerySet):
         ids_and_comments = posts_with_comments.values_list('id', 'comments__count')
         count_for_id = dict(ids_and_comments)
         for post in self:
-            post.comments_count = count_for_id[post.id]
+            post.comments__count = count_for_id[post.id]
         return self
 
 
@@ -67,7 +67,6 @@ class TagQuerySet(models.QuerySet):
     def popular(self):
         popular_tags = self.annotate(Count('posts')).order_by('-posts__count')
         return popular_tags
-        # return self
 
 
 class Tag(models.Model):
