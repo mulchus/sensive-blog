@@ -30,8 +30,6 @@ class Post(models.Model):
     image = models.ImageField('Картинка')
     published_at = models.DateTimeField('Дата и время публикации')
 
-    objects = PostQuerySet.as_manager()
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -58,6 +56,8 @@ class Post(models.Model):
         verbose_name = 'пост'
         verbose_name_plural = 'посты'
 
+    objects = PostQuerySet.as_manager()
+
 
 class TagQuerySet(models.QuerySet):
     def popular(self):
@@ -67,8 +67,6 @@ class TagQuerySet(models.QuerySet):
 
 class Tag(models.Model):
     title = models.CharField('Тег', max_length=20, unique=True)
-
-    objects = TagQuerySet.as_manager()
 
     def __str__(self):
         return self.title
@@ -83,6 +81,8 @@ class Tag(models.Model):
         ordering = ['title']
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
+
+    objects = TagQuerySet.as_manager()
 
 
 class Comment(models.Model):
